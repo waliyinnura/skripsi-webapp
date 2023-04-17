@@ -1,25 +1,59 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import SignIn from "../components/SignIn.vue";
+import SignUp from "../components/SignUp.vue";
+import Transaksi from "../components/Transaksi.vue";
+import Profile from "../components/Profile.vue";
+import Menu from "../components/Menu.vue";
+import Restoran from "../components/Restoran.vue";
+import Patterns from "../components/Patterns.vue";
+import Error from "../components/Error.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/",
+    name: "Transaksi",
+    component: Transaksi,
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: "/sign-up",
+    name: "SignUp",
+    component: SignUp,
+  },
+  {
+    path: "/sign-in",
+    name: "SignIn",
+    component: SignIn,
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+  },
+  {
+    path: "/menu",
+    name: "Menu",
+    component: Menu,
+  },
+  {
+    path: "/restoran",
+    name: "Restoran",
+    component: Restoran,
+  },
+  {
+    path: "/patterns",
+    name: "Patterns",
+    component: Patterns,
+  },
+  {
+    path: "/404",
+    name: "Error",
+    component: Error,
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;
