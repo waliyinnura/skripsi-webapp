@@ -1,13 +1,16 @@
 <template>
   <Navbar />
   <div class="container">
+    <!-- navbar search -->
     <nav class="navbar bg-body-tertiary">
       <div class="container-fluid">
         <form class="d-flex" role="search">
+          <!-- search bar -->
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" v-model="cari" />
         </form>
       </div>
     </nav>
+    <!-- navbar search -->
     <table class="table my-2">
       <thead>
         <tr>
@@ -15,8 +18,11 @@
           <th scope="col">Alamat</th>
         </tr>
       </thead>
+      <!-- jika server tidak bermasalah -->
       <tbody v-if="isOnline" class="table-group-divider">
+        <!-- looping +print  1 1 -->
         <tr v-for="restoran in cariRestoran" :key="restoran.idRestoran">
+          <!-- verif -->
           <td v-if="restoran.status == 'terverifikasi'">
             {{ restoran.nama }}
             <i class="bi bi-check-square"></i>
@@ -26,14 +32,15 @@
           </td>
           <td>{{ restoran.alamat }}</td>
           <td>
-            <p
-              role="button"
-              class="text-decoration-underline detail"
-              data-bs-toggle="modal"
-              data-bs-target="#detailModal"
-              @click="SendDetail(restoran.idRestoran, restoran.nama, restoran.alamat, restoran.nomorTelepon, restoran.email, restoran.jumlahMeja, restoran.status)"
-            >
-              Detail
+            <!-- btn modal detail -->
+            <p>
+              <i
+                class="bi bi-three-dots-vertical"
+                role="button"
+                data-bs-toggle="modal"
+                data-bs-target="#detailModal"
+                @click="SendDetail(restoran.idRestoran, restoran.nama, restoran.alamat, restoran.nomorTelepon, restoran.email, restoran.jumlahMeja, restoran.status, restoran.qrchatbot)"
+              ></i>
             </p>
           </td>
         </tr>
@@ -42,7 +49,7 @@
   </div>
 
   <!-- modal -->
-  <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="exampleModalLabel" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -60,10 +67,20 @@
             <div class="col-9">: {{ this.email }}</div>
             <div class="col-3">Jumlah Meja</div>
             <div class="col-9">: {{ this.jumlahMeja }}</div>
+            <!-- input gambar qr muncul jika belom terverifikasi -->
+            <div class="col-12 mt-2">
+              <input class="form-control" type="file" id="formFile" name="image" @change="onFileSelected" />
+              <p class="text-danger text-start fw-lighter opacity-75">{{ validateQRcode }}</p>
+            </div>
           </div>
         </div>
+        <!-- footer + btn muncul jika belom terverifikasi -->
         <div class="modal-footer" v-if="this.status == 'belum terverifikasi'">
           <button type="button" class="btn btn-secondary" @click="Validasi">Verifikasi Restoran</button>
+        </div>
+        <div class="modal-footer" v-if="this.status == 'terverifikasi'">
+          <button type="button" class="btn btn-secondary" @click="UpdateQRCode">Ubah QR code Restoran</button>
+          <button type="button" class="btn btn-secondary" @click="RemoveVerifikasi">Copot Verifikasi Restoran</button>
         </div>
       </div>
     </div>
@@ -82,6 +99,7 @@ export default {
       token: localStorage.getItem("token"),
       isOnline: "",
       restorans: [],
+      id: "",
       nama: "",
       alamat: "",
       nomorTelepon: "",
@@ -89,17 +107,23 @@ export default {
       jumlahMeja: "",
       cari: "",
       status: "",
+      lokasi: "",
+      file: null,
+      namaFotoQRcode: "",
+      validateQRcode: "",
     };
   },
   components: {
     Navbar,
   },
   mounted() {
+    // trigger jika belom login akan diarahkan ke login
     if (!this.token || this.role == "operator") {
       localStorage.clear();
       this.$router.push({ name: "SignIn" });
     }
 
+    // get all restoran
     axios
       .get("http://localhost:3000/restoran", {
         headers: {
@@ -111,15 +135,16 @@ export default {
         if (res.status == 200) {
           this.isOnline = true;
           this.restorans = res.data.data;
-          console.log(this.restorans);
         }
       })
       .catch((error) => {
-        this.isOnline = false;
+        // this.isOnline = false;
+        console.log(error);
       });
   },
   methods: {
-    SendDetail(id, nama, alamat, nomorTelepon, email, jumlahMeja, status) {
+    // get data restoran
+    SendDetail(id, nama, alamat, nomorTelepon, email, jumlahMeja, status, namaFotoQRcode, file) {
       this.id = id;
       this.nama = nama;
       this.alamat = alamat;
@@ -127,12 +152,79 @@ export default {
       this.email = email;
       this.jumlahMeja = jumlahMeja;
       this.status = status;
+      this.lokasi = "qr";
+      this.namaFotoQRcode = namaFotoQRcode;
     },
+    // get image
+    onFileSelected(event) {
+      this.file = event.target.files[0];
+    },
+    // upload foto qr + memberi verifikasi
     Validasi() {
+      if (this.file == null) {
+        this.validateQRcode = "File harus terisi";
+        return;
+      }
+
+      var bodyFormData = new FormData();
+      bodyFormData.append("image", this.file, this.file.name);
+      bodyFormData.append("lokasi", this.lokasi);
+      bodyFormData.append("idRestoran", this.id);
+      axios
+        .post("http://localhost:3000/common/upload", bodyFormData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: "Bearer " + this.token,
+          },
+        })
+        .then((res) => {
+          if (res.status == 200) {
+            axios
+              .post(
+                "http://localhost:3000/restoran/postVerifikasi",
+                {
+                  idRestoran: this.id,
+                  status: "terverifikasi",
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + this.token,
+                  },
+                }
+              )
+              .then((res) => {
+                if (res.status == 200) {
+                  location.reload();
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+                alert("Restoran tidak berhasil di verifikasi");
+              });
+          }
+        })
+        .catch((error) => {
+          consoe.log(error);
+        });
+    },
+    // update foto qr
+    UpdateQRCode() {
+      if (this.file == null) {
+        this.validateQRcode = "File harus terisi";
+        return;
+      }
+
+      var bodyFormData = new FormData();
+      bodyFormData.append("image", this.file, this.file.name);
+      bodyFormData.append("lokasi", this.lokasi);
+      bodyFormData.append("idRestoran", this.id);
       axios
         .post(
-          "http://localhost:3000/restoran/postVerifikasi",
+          "http://localhost:3000/common/delete",
           {
+            oldImage: this.namaFotoQRcode,
+            lokasi: this.lokasi,
             idRestoran: this.id,
           },
           {
@@ -144,16 +236,74 @@ export default {
         )
         .then((res) => {
           if (res.status == 200) {
-            location.reload();
+            axios
+              .post("http://localhost:3000/common/upload", bodyFormData, {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: "Bearer " + this.token,
+                },
+              })
+              .then((res) => {
+                if (res.status == 200) {
+                  location.reload();
+                }
+              })
+              .catch((error) => {
+                consoe.log(error);
+              });
           }
         })
         .catch((error) => {
           console.log(error);
-          alert("Restoran tidak berhasil di verifikasi");
+        });
+    },
+    RemoveVerifikasi() {
+      axios
+        .post(
+          "http://localhost:3000/common/delete",
+          {
+            oldImage: this.namaFotoQRcode,
+            lokasi: this.lokasi,
+            idRestoran: this.id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + this.token,
+            },
+          }
+        )
+        .then((res) => {
+          if (res.status == 200) {
+            axios
+              .post(
+                "http://localhost:3000/restoran/postVerifikasi",
+                {
+                  idRestoran: this.id,
+                  status: "belum terverifikasi",
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + this.token,
+                  },
+                }
+              )
+              .then((res) => {
+                if (res.status == 200) {
+                  location.reload();
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+                alert("Restoran tidak berhasil di verifikasi");
+              });
+          }
         });
     },
   },
   computed: {
+    // fungsi search
     cariRestoran() {
       return this.restorans.filter((restoran) => {
         return restoran.nama.match(this.cari);
@@ -163,4 +313,13 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+.restoran {
+  margin-top: 100px;
+}
+
+.col-12 p {
+  margin-left: 10px;
+  font-size: 12px;
+}
+</style>

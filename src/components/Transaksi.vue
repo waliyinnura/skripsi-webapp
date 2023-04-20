@@ -1,13 +1,16 @@
 <template>
   <Navbar />
   <div class="container">
+    <!-- navbar transaksi -->
     <nav class="navbar bg-body-tertiary">
       <div class="container-fluid">
         <form class="d-flex" role="search">
+          <!-- search -->
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" v-model="cari" />
         </form>
       </div>
     </nav>
+    <!-- navbar transaksi -->
     <table class="table">
       <thead>
         <tr>
@@ -16,11 +19,13 @@
           <th scope="col">Tanggal Pesan</th>
         </tr>
       </thead>
-      <tbody class="table-group-divider">
+      <!-- jika server aman -->
+      <tbody v-if="adaData == 'ada'" class="table-group-divider">
         <tr v-for="transaksi in cariTransaksi" :key="transaksi.idTransaksi">
           <td>{{ transaksi.username }} <span class="badge text-bg-info ms-2 text-light" v-if="transaksi.status == 'lunas'">Lunas</span></td>
           <td>{{ transaksi.nomorMeja }}</td>
           <td>{{ transaksi.tanggalBuat }}</td>
+          <!-- btn detail -->
           <td>
             <p role="button" data-bs-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
               Detail
@@ -28,11 +33,32 @@
           </td>
         </tr>
       </tbody>
+      <tbody v-else-if="adaData == 'data tidak ada'" class="table-group-divider">
+        <tr class="text-center">
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+      <tbody v-else-if="adaData == 'server down'" class="table-group-divider">
+        <tr class="text-center">
+          <td></td>
+          <td><b>Server Down &#128591; </b></td>
+          <td></td>
+        </tr>
+      </tbody>
+      <tbody v-else class="table-group-divider">
+        <tr class="text-center">
+          <td></td>
+          <td><b>Server Down &#128591; </b></td>
+          <td></td>
+        </tr>
+      </tbody>
     </table>
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="ModalTransaksi" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="ModalTransaksi" tabindex="-1" aria-labelledby="exampleModalLabel" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -88,7 +114,7 @@ export default {
       token: localStorage.getItem("token"),
       role: localStorage.getItem("role"),
       cari: "",
-      isOnline: "",
+      adaData: "",
       transaksis: [],
       detailTransaksis: [],
       total: "",
@@ -115,12 +141,16 @@ export default {
       })
       .then((res) => {
         if (res.status == 200) {
-          this.isOnline = true;
+          this.adaData = "ada";
           this.transaksis = res.data.data;
         }
       })
       .catch((error) => {
-        this.isOnline = false;
+        if (error.code == "ERR_NETWORK") {
+          this.adaData = "server down";
+        } else if (error.response.status == 404) {
+          this.adaData = "data tidak ada";
+        }
       });
   },
   computed: {
@@ -159,7 +189,7 @@ export default {
           }
         })
         .catch((error) => {
-          this.isOnline = false;
+          this.adaData = false;
         });
     },
     StatusBayar() {
