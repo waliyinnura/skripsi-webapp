@@ -94,6 +94,7 @@ export default {
           this.$router.push({ name: this.operator ? "Transaksi" : "Restoran" });
         }
       } catch (error) {
+        // jika server down maka akan ke halaman error
         if (error.code == "ERR_NETWORK") {
           this.$router.push({ name: "Error" });
         } else {

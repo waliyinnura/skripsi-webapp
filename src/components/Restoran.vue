@@ -39,7 +39,7 @@
                 role="button"
                 data-bs-toggle="modal"
                 data-bs-target="#detailModal"
-                @click="SendDetail(restoran.idRestoran, restoran.nama, restoran.alamat, restoran.nomorTelepon, restoran.email, restoran.jumlahMeja, restoran.status, restoran.qrchatbot)"
+                @click="SendDetail(restoran.idRestoran, restoran.nama, restoran.alamat, restoran.nomorTelepon, restoran.email, restoran.jumlahMeja, restoran.status, restoran.qrchatbot, restoran.fotoMenu)"
               ></i>
             </p>
           </td>
@@ -54,7 +54,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Detail Restoran</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="Close"></button>
         </div>
         <div class="modal-body">
           <h2>{{ this.nama }}</h2>
@@ -66,9 +66,29 @@
             <div class="col-3">Email</div>
             <div class="col-9">: {{ this.email }}</div>
             <div class="col-3">Jumlah Meja</div>
-            <div class="col-9">: {{ this.jumlahMeja }}</div>
+            <div class="col-9 mb-2">: {{ this.jumlahMeja }}</div>
+
+            <div class="col-4" v-if="fotoMenu != null">
+              <img v-bind:src="fotoMenu" class="img-thumbnail foto-menu" alt="Foto Menu" />
+            </div>
+            <div class="col menu rounded-2" v-if="menus.length != 0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Tipe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="menu in menus" :key="menu.idMenu">
+                    <td>{{ menu.nama }}</td>
+                    <td>{{ menu.tipe }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <!-- input gambar qr muncul jika belom terverifikasi -->
-            <div class="col-12 mt-2">
+            <div class="col-12 mt-3">
               <input class="form-control" type="file" id="formFile" name="image" @change="onFileSelected" />
               <p class="text-danger text-start fw-lighter opacity-75">{{ validateQRcode }}</p>
             </div>
@@ -110,7 +130,9 @@ export default {
       lokasi: "",
       file: null,
       namaFotoQRcode: "",
+      fotoMenu: null,
       validateQRcode: "",
+      menus: [],
     };
   },
   components: {
@@ -143,8 +165,22 @@ export default {
       });
   },
   methods: {
+    Close() {
+      this.id = "";
+      this.nama = "";
+      this.alamat = "";
+      this.nomorTelepon = "";
+      this.email = "";
+      this.jumlahMeja = "";
+      this.status = "";
+      this.lokasi = "";
+      this.namaFotoQRcode = "";
+      this.fotoMenu = null;
+      this.menus = [];
+    },
+
     // get data restoran
-    SendDetail(id, nama, alamat, nomorTelepon, email, jumlahMeja, status, namaFotoQRcode, file) {
+    SendDetail(id, nama, alamat, nomorTelepon, email, jumlahMeja, status, namaFotoQRcode, fotoMenu) {
       this.id = id;
       this.nama = nama;
       this.alamat = alamat;
@@ -154,6 +190,33 @@ export default {
       this.status = status;
       this.lokasi = "qr";
       this.namaFotoQRcode = namaFotoQRcode;
+      if (fotoMenu) {
+        this.fotoMenu = require("../../../skripsi-api/image/" + fotoMenu);
+      }
+
+      axios
+        .post(
+          "http://localhost:3000/menu/getAllMenuIdRestoran",
+          {
+            // id harus terisi
+            idRestoran: id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((res) => {
+          if (res.status == 200) {
+            this.menus = res.data.data;
+          }
+        })
+        .catch((error) => {
+          if (error.response.status == 404) {
+            return;
+          }
+        });
     },
     // get image
     onFileSelected(event) {
@@ -314,6 +377,16 @@ export default {
 </script>
 
 <style scoped>
+.menu {
+  height: 150px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.foto-menu {
+  height: 150px;
+}
+
 .restoran {
   margin-top: 100px;
 }

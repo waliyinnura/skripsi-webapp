@@ -102,8 +102,15 @@ export default {
           this.$router.push({ name: "SignIn" });
         }
       } catch (error) {
+        // jika server down maka akan ke halaman error
         if (error.code == "ERR_NETWORK") {
           this.$router.push({ name: "Error" });
+        } else if (error.response.data.error == "Nama telah digunakan") {
+          this.namaValidate = "Nama telah digunakan";
+        } else if (error.response.data.error == "Alamat terlalu panjang") {
+          this.alamatValidate = "Alamat terlalu panjang";
+        } else if (error.response.data.error == "Email telah digunakan") {
+          this.emailValidate = "Email telah digunakan";
         } else {
           const errs = error.response.data.error;
           for (var key in errs) {
