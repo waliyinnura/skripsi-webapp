@@ -89,7 +89,7 @@ export default {
   methods: {
     async signUp() {
       try {
-        let result = await axios.post("http://localhost:3000/restoran/registrasi", {
+        let result = await axios.post(`http://localhost:3000/restoran/registrasi`, {
           nama: this.nama,
           email: this.email,
           nomorTelepon: this.nomorTelepon,

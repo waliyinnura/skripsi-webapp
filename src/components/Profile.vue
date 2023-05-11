@@ -367,7 +367,7 @@ export default {
           }
         })
         .catch((error) => {
-          consoe.log(error);
+          console.log(error);
         });
     },
     UbahGambar() {
@@ -410,7 +410,7 @@ export default {
                 }
               })
               .catch((error) => {
-                consoe.log(error);
+                console.log(error);
               });
           }
         })

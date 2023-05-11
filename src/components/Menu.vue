@@ -43,7 +43,7 @@
       <tbody v-else-if="adaData == 'server down'" class="table-group-divider">
         <tr class="text-center">
           <td></td>
-          <td><b>Server Down &#128591; </b></td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>
@@ -51,7 +51,7 @@
       <tbody v-else class="table-group-divider">
         <tr class="text-center">
           <td></td>
-          <td><b>Server Down &#128591; </b></td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>

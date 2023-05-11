@@ -77,12 +77,12 @@ export default {
       try {
         let result;
         if (this.operator) {
-          result = await axios.post("http://localhost:3000/restoran/login", {
+          result = await axios.post(`http://localhost:3000/restoran/login`, {
             email: this.email,
             password: this.password,
           });
         } else {
-          result = await axios.post("http://localhost:3000/admin/login", {
+          result = await axios.post(`http://localhost:3000/admin/login`, {
             nama: this.nama,
             password: this.password,
           });
@@ -95,6 +95,7 @@ export default {
         }
       } catch (error) {
         // jika server down maka akan ke halaman error
+        console.log(error);
         if (error.code == "ERR_NETWORK") {
           this.$router.push({ name: "Error" });
         } else {

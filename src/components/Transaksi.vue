@@ -43,14 +43,14 @@
       <tbody v-else-if="adaData == 'server down'" class="table-group-divider">
         <tr class="text-center">
           <td></td>
-          <td><b>Server Down &#128591; </b></td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>
       <tbody v-else class="table-group-divider">
         <tr class="text-center">
           <td></td>
-          <td><b>Server Down &#128591; </b></td>
+          <td></td>
           <td></td>
         </tr>
       </tbody>
@@ -127,6 +127,7 @@ export default {
     };
   },
   mounted() {
+    console.log(process.env.URL_API);
     if (!this.token || this.role == "admin") {
       localStorage.clear();
       this.$router.push({ name: "SignIn" });
