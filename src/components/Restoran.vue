@@ -10,14 +10,16 @@
         </form>
       </div>
     </nav>
-    <!-- navbar search -->
+    <!-- end navbar search -->
     <table class="table my-2">
+      <!-- head tabel -->
       <thead>
         <tr>
           <th scope="col">Nama Restoran</th>
           <th scope="col">Alamat</th>
         </tr>
       </thead>
+      <!-- end head tabel -->
       <!-- jika server tidak bermasalah -->
       <tbody v-if="isOnline" class="table-group-divider">
         <!-- looping +print  1 1 -->
@@ -30,6 +32,7 @@
           <td v-else>
             {{ restoran.nama }}
           </td>
+          <!-- end verif -->
           <td>{{ restoran.alamat }}</td>
           <td>
             <!-- btn modal detail -->
@@ -42,6 +45,7 @@
                 @click="SendDetail(restoran.idRestoran, restoran.nama, restoran.alamat, restoran.nomorTelepon, restoran.email, restoran.jumlahMeja, restoran.status, restoran.qrchatbot, restoran.fotoMenu)"
               ></i>
             </p>
+            <!-- end btn modal detail -->
           </td>
         </tr>
       </tbody>
@@ -68,9 +72,12 @@
             <div class="col-3">Jumlah Meja</div>
             <div class="col-9 mb-2">: {{ this.jumlahMeja }}</div>
 
+            <!-- foto menu -->
             <div class="col-4" v-if="fotoMenu != null">
               <img v-bind:src="fotoMenu" class="img-thumbnail foto-menu" alt="Foto Menu" />
             </div>
+            <!-- end foto menu -->
+            <!-- menu -->
             <div class="col menu rounded-2" v-if="menus.length != 0">
               <table class="table">
                 <thead>
@@ -87,15 +94,20 @@
                 </tbody>
               </table>
             </div>
-            <!-- input gambar qr muncul jika belom terverifikasi -->
-            <div class="col-12 mt-3">
-              <input class="form-control" type="file" id="formFile" name="image" @change="onFileSelected" />
-              <p class="text-danger text-start fw-lighter opacity-75">{{ validateQRcode }}</p>
+            <!-- end menu -->
+            <!-- input link terverifikasi + sudah upload gambar menu + mengisi data menu -->
+            <div class="col-12 mt-3" v-if="fotoMenu != null && menus.length != 0">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="floatingInput" v-model="telegramLink" />
+                <label for="floatingInput">Link Telegram</label>
+                <p class="text-danger text-start fw-lighter opacity-75">{{ linkTelegramValidasi }}</p>
+              </div>
             </div>
+            <!-- end input link -->
           </div>
         </div>
-        <!-- footer + btn muncul jika belom terverifikasi -->
-        <div class="modal-footer" v-if="this.status == 'belum terverifikasi'">
+        <!-- footer + btn muncul jika belom terverifikasi,  data menu dan data gambar menu -->
+        <div class="modal-footer" v-if="this.status == 'belum terverifikasi' && fotoMenu != null && menus.length != 0">
           <button type="button" class="btn btn-secondary" @click="Validasi">Verifikasi Restoran</button>
         </div>
         <div class="modal-footer" v-if="this.status == 'terverifikasi'">
@@ -133,6 +145,8 @@ export default {
       fotoMenu: null,
       validateQRcode: "",
       menus: [],
+      telegramLink: "",
+      linkTelegramValidasi: "",
     };
   },
   components: {
@@ -224,22 +238,20 @@ export default {
     },
     // upload foto qr + memberi verifikasi
     Validasi() {
-      if (this.file == null) {
-        this.validateQRcode = "File harus terisi";
-        return;
-      }
-
-      var bodyFormData = new FormData();
-      bodyFormData.append("image", this.file, this.file.name);
-      bodyFormData.append("lokasi", this.lokasi);
-      bodyFormData.append("idRestoran", this.id);
       axios
-        .post("http://localhost:3000/common/upload", bodyFormData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: "Bearer " + this.token,
+        .post(
+          "http://localhost:3000/qr",
+          {
+            idRestoran: this.id,
+            telegramLink: this.telegramLink,
           },
-        })
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + this.token,
+            },
+          }
+        )
         .then((res) => {
           if (res.status == 200) {
             axios
@@ -268,20 +280,19 @@ export default {
           }
         })
         .catch((error) => {
-          consoe.log(error);
+          if (error.code == "ERR_NETWORK") {
+            alert("Data tidak berhasil di input");
+            location.reload();
+          } else {
+            const errs = error.response.data.error;
+            for (var key in errs) {
+              if ((key = "link")) this.linkTelegramValidasi = errs[key];
+            }
+          }
         });
     },
     // update foto qr
     UpdateQRCode() {
-      if (this.file == null) {
-        this.validateQRcode = "File harus terisi";
-        return;
-      }
-
-      var bodyFormData = new FormData();
-      bodyFormData.append("image", this.file, this.file.name);
-      bodyFormData.append("lokasi", this.lokasi);
-      bodyFormData.append("idRestoran", this.id);
       axios
         .post(
           "http://localhost:3000/common/delete",
@@ -300,19 +311,26 @@ export default {
         .then((res) => {
           if (res.status == 200) {
             axios
-              .post("http://localhost:3000/common/upload", bodyFormData, {
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                  Authorization: "Bearer " + this.token,
+              .post(
+                "http://localhost:3000/qr",
+                {
+                  idRestoran: this.id,
+                  telegramLink: this.telegramLink,
                 },
-              })
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + this.token,
+                  },
+                }
+              )
               .then((res) => {
                 if (res.status == 200) {
                   location.reload();
                 }
               })
               .catch((error) => {
-                consoe.log(error);
+                console.log(error);
               });
           }
         })

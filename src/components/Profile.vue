@@ -30,6 +30,10 @@
           <i class="bi bi-lock"></i>
           Ubah password
         </p>
+        <p type="button" class="figure-caption delete" data-bs-toggle="modal" data-bs-target="#modalProfile" @click="this.modal = 'Delete Akun'">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          DELETE AKUN
+        </p>
       </div>
       <!-- profil -->
     </div>
@@ -52,6 +56,10 @@
       <p type="button" class="figure-caption fst-italic password" data-bs-toggle="modal" data-bs-target="#modalProfile" @click="this.modal = 'Ubah Password'">
         <i class="bi bi-lock"></i>
         Ubah password
+      </p>
+      <p type="button" class="figure-caption delete" data-bs-toggle="modal" data-bs-target="#modalProfile" @click="this.modal = 'Delete Akun'">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        DELETE AKUN
       </p>
     </div>
     <!-- profil -->
@@ -142,7 +150,7 @@
             </div>
           </div>
         </div>
-        <!-- edit profile body -->
+        <!-- end edit profile body -->
         <!-- ubah password body -->
         <div class="modal-body row" v-else-if="this.modal == 'Ubah Password'">
           <div class="col-12">
@@ -167,7 +175,7 @@
             </div>
           </div>
         </div>
-        <!-- ubah password body -->
+        <!-- end ubah password body -->
         <!-- Upload Gambar body -->
         <div class="modal-body" v-else-if="this.modal == 'Upload Gambar' || this.modal == 'Ubah Gambar'">
           <div class="mb-3 file">
@@ -176,7 +184,17 @@
             <p class="text-danger text-start fw-lighter opacity-75">{{ fotoMenuValidate }}</p>
           </div>
         </div>
-        <!-- ubah password body -->
+        <!-- end Upload Gambar body -->
+        <!-- Delete Akun body -->
+        <div class="modal-body" v-else-if="this.modal == 'Delete Akun'">
+          <h5>Anda ingin menghapus akun anda?</h5>
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" placeholder="Password" v-model="password" />
+            <label for="floatingInput">Password</label>
+            <p class="text-danger text-start fw-lighter opacity-75">{{ passwordValidate }}</p>
+          </div>
+        </div>
+        <!-- end Delete Akun body -->
         <!-- modal body -->
         <!-- modal footer -->
         <div class="modal-footer">
@@ -184,6 +202,7 @@
           <button type="button" class="btn btn-secondary" v-else-if="this.modal == 'Ubah Password'" @click="UbahPassword">Save password</button>
           <button type="button" class="btn btn-secondary" v-else-if="this.modal == 'Ubah Gambar'" @click="UbahGambar">Ubah Gambar</button>
           <button type="button" class="btn btn-secondary" v-else-if="this.modal == 'Upload Gambar'" @click="UploadGambar">Upload Gambar</button>
+          <button type="button" class="btn btn-secondary" v-else-if="this.modal == 'Delete Akun'" @click="DeleteAkun">Delete</button>
         </div>
         <!-- modal footer -->
       </div>
@@ -207,6 +226,8 @@ export default {
       email: "",
       nomorTelepon: "",
       jumlahMeja: "",
+      password: "",
+      passwordValidate: "",
       passwordLama: "",
       passwordBaru: "",
       konfirmasiPasswordBaru: "",
@@ -418,6 +439,44 @@ export default {
           console.log(error);
         });
     },
+    DeleteAkun() {
+      console.log(this.id);
+      console.log(this.password);
+
+      axios
+        .post(
+          "http://localhost:3000/restoran/delete",
+          {
+            idRestoran: this.id,
+            password: this.password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + this.token,
+            },
+          }
+        )
+        .then((res) => {
+          if ((res.status = 200)) {
+            localStorage.clear();
+            this.$router.push({ name: "SignIn" });
+            location.reload();
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          if (error.code == "ERR_NETWORK") {
+            alert("Data tidak berhasil di input");
+            location.reload();
+          } else {
+            const errs = error.response.data.error;
+            for (var key in errs) {
+              if ((key = "password")) this.passwordValidate = errs[key];
+            }
+          }
+        });
+    },
   },
 };
 </script>
@@ -437,6 +496,11 @@ figure img {
 
 .password {
   margin-top: -15px;
+}
+
+.delete {
+  margin-top: -15px;
+  color: #ff8776;
 }
 
 .bi-pencil-fill {
