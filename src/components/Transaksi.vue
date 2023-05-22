@@ -24,7 +24,7 @@
         <tr v-for="transaksi in cariTransaksi" :key="transaksi.idTransaksi">
           <td>{{ transaksi.username }} <span class="badge text-bg-info ms-2 text-light" v-if="transaksi.status == 'lunas'">Lunas</span></td>
           <td>{{ transaksi.nomorMeja }}</td>
-          <td>{{ transaksi.tanggalBuat }}</td>
+          <td>{{ new Date(transaksi.tanggalBuat).toLocaleString() }}</td>
           <!-- btn detail -->
           <td>
             <p role="button" data-bs-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
@@ -69,8 +69,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p class="text-center tanggalBuat">Pesan: {{ this.tanggalBuat }}</p>
-          <p class="text-center tanggalBuat" v-if="this.tanggalBayar">Bayar: {{ this.tanggalBayar }}</p>
+          <p class="text-center tanggalBuat">Pesan: {{ new Date(this.tanggalBuat).toLocaleString() }}</p>
+          <p class="text-center tanggalBuat" v-if="this.tanggalBayar">Bayar: {{ new Date(this.tanggalBayar).toLocaleString() }}</p>
           <div class="p-2">
             <div class="row border-bottom">
               <div class="col-5"><b>Nama Menu</b></div>

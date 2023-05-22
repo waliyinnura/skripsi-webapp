@@ -8,7 +8,7 @@
           <!-- image qr -->
           <img v-bind:src="qr" class="figure-img img-fluid rounded" alt="qr" />
           <!-- btn download -->
-          <figcaption type="button" class="figure-caption text-center"><i class="bi bi-download"> Download QR</i></figcaption>
+          <figcaption type="button" class="figure-caption text-center" @click="Download"><i class="bi bi-download"> Download QR</i></figcaption>
         </figure>
       </div>
       <!-- qr  -->
@@ -475,6 +475,18 @@ export default {
               if ((key = "password")) this.passwordValidate = errs[key];
             }
           }
+        });
+    },
+    Download() {
+      axios
+        .get("http://localhost:3000/common/download", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + this.token,
+          },
+        })
+        .catch((error) => {
+          console.log(error);
         });
     },
   },
