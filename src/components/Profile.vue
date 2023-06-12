@@ -189,7 +189,7 @@
         <div class="modal-body" v-else-if="this.modal == 'Delete Akun'">
           <h5>Anda ingin menghapus akun anda?</h5>
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" placeholder="Password" v-model="password" />
+            <input type="password" class="form-control" placeholder="Password" v-model="password" />
             <label for="floatingInput">Password</label>
             <p class="text-danger text-start fw-lighter opacity-75">{{ passwordValidate }}</p>
           </div>
