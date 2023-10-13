@@ -10,6 +10,27 @@
         </form>
       </div>
     </nav>
+    <!-- filter -->
+    <div class="filter">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"  autocomplete="off" v-model="cariLunas" v-bind:value="''" checked>
+        <label class="form-check-label" for="flexRadioDefault1">
+          No Filter
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" v-model="cariLunas" v-bind:value="'lunas'">
+        <label class="form-check-label" for="flexRadioDefault2">
+          Lunas
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" v-model="cariLunas" v-bind:value="'belum bayar'">
+        <label class="form-check-label" for="flexRadioDefault3">
+          Belum Bayar
+        </label>
+      </div>
+    </div>
     <!-- navbar transaksi -->
     <table class="table">
       <thead>
@@ -27,7 +48,7 @@
           <td>{{ new Date(transaksi.tanggalBuat).toLocaleString() }}</td>
           <!-- btn detail -->
           <td>
-            <p role="button" data-bs-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
+            <p role="button" data-bts-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
               Detail
             </p>
           </td>
@@ -114,6 +135,7 @@ export default {
       token: localStorage.getItem("token"),
       role: localStorage.getItem("role"),
       cari: "",
+      cariLunas: "",
       adaData: "",
       transaksis: [],
       detailTransaksis: [],
@@ -127,7 +149,6 @@ export default {
     };
   },
   mounted() {
-    console.log(process.env.URL_API);
     if (!this.token || this.role == "admin") {
       localStorage.clear();
       this.$router.push({ name: "SignIn" });
@@ -156,10 +177,20 @@ export default {
   },
   computed: {
     cariTransaksi() {
+
       return this.transaksis.filter((transaksi) => {
-        return transaksi.username.match(this.cari);
+        if (this.cariLunas.length !== 0 && transaksi.status === this.cariLunas){
+          return transaksi.username.match(this.cari);
+        } else if (this.cariLunas.length === 0){
+          return transaksi.username.match(this.cari);
+        }
       });
     },
+    // cariLunas() {
+    //   return this.transaksis.filter((transaksi) => {
+    //     return transaksi.status.match(this.cariLunas)
+    //   })
+    // }
   },
   methods: {
     SendDetail(idTransaksi, username, nomorMeja, tanggalBuat, status, tanggalBayar) {
@@ -224,4 +255,14 @@ export default {
   font-size: 14px;
   margin-top: -10px;
 }
+
+.filter {
+  display: flex;
+  margin: 10px;
+}
+
+.filter .form-check {
+  margin: 0 10px;
+}
+
 </style>
