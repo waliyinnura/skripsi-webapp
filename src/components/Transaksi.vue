@@ -177,7 +177,6 @@ export default {
   },
   computed: {
     cariTransaksi() {
-
       return this.transaksis.filter((transaksi) => {
         if (this.cariLunas.length !== 0 && transaksi.status === this.cariLunas){
           return transaksi.username.match(this.cari);
