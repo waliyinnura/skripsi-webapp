@@ -12,6 +12,26 @@
         </form>
       </div>
     </nav>
+    <div class="filter">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"  autocomplete="off" v-model="type" v-bind:value="''" checked>
+        <label class="form-check-label" for="flexRadioDefault1">
+          No Filter
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" v-model="type" v-bind:value="'makanan'">
+        <label class="form-check-label" for="flexRadioDefault2">
+          makanan
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" v-model="type" v-bind:value="'minuman'">
+        <label class="form-check-label" for="flexRadioDefault3">
+          minuman
+        </label>
+      </div>
+    </div>
     <!-- navbar menu -->
     <table class="table my-4">
       <thead>
@@ -145,6 +165,7 @@ export default {
       harga: "",
       tipe: "",
       cari: "",
+      type: "",
       namaValidate: "",
       hargaValidate: "",
       tipeValidate: "",
@@ -307,7 +328,11 @@ export default {
   computed: {
     cariMenu() {
       return this.menus.filter((menu) => {
-        return menu.nama.match(this.cari);
+        if (this.type.length !== 0 && menu.tipe === this.type){
+          return menu.nama.match(this.cari);
+        } else if (this.type.length === 0){
+          return menu.nama.match(this.cari);
+        }
       });
     },
   },
@@ -328,5 +353,14 @@ td {
 .form-floating p {
   margin-left: 10px;
   font-size: 12px;
+}
+
+.filter {
+  display: flex;
+  margin: 10px;
+}
+
+.filter .form-check {
+  margin: 0 10px;
 }
 </style>
