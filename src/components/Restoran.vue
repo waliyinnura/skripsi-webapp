@@ -57,7 +57,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Detail Restoran</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Detail Restoran Id {{ this.id }}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="Close"></button>
         </div>
         <div class="modal-body">
@@ -412,5 +412,10 @@ export default {
 .col-12 p {
   margin-left: 10px;
   font-size: 12px;
+}
+
+span {
+  padding: 5px;
+  background-color: grey;
 }
 </style>
