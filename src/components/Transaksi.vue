@@ -48,7 +48,7 @@
           <td>{{ new Date(transaksi.tanggalBuat).toLocaleString() }}</td>
           <!-- btn detail -->
           <td>
-            <p role="button" data-bts-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
+            <p role="button" data-bs-toggle="modal" data-bs-target="#ModalTransaksi" @click="SendDetail(transaksi.idTransaksi, transaksi.username, transaksi.nomorMeja, transaksi.tanggalBuat, transaksi.status, transaksi.tanggalBayar)">
               Detail
             </p>
           </td>
