@@ -199,7 +199,6 @@ export default {
       this.tanggalBuat = tanggalBuat;
       this.status = status;
       this.tanggalBayar = tanggalBayar;
-
       axios
         .post(
           "http://localhost:3000/transaksi/getDetailTransaksi",
@@ -217,6 +216,7 @@ export default {
             this.detailTransaksis = res.data.data;
             this.total = res.data.total;
           }
+          console.log(this.total);
         })
         .catch((error) => {
           this.adaData = false;
