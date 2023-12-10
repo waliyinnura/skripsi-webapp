@@ -43,7 +43,7 @@
       </thead>
       <!-- jika server aman -->
       <tbody v-if="adaData == 'ada'" class="table-group-divider">
-        <tr v-for="menu in cariMenu" :key="menu.idMenu">
+        <tr v-for="menu in cariMenus" :key="menu.idMenu">
           <td>{{ menu.nama }}</td>
           <td>{{ menu.harga }}</td>
           <td>{{ menu.tipe }}</td>
@@ -76,7 +76,20 @@
         </tr>
       </tbody>
     </table>
+    <div aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" v-if="page > 1"><a class="page-link" href="#" @click="countPage(false)">Previous</a></li>
+        <li class="page-item" v-for="page in pages" :key="page">
+          <a class="page-link" href="#" v-if="!(pages.length === 1)" @click="selectPage(page)" >
+            {{page}}
+          </a>
+        </li>
+        <li class="page-item" v-if="page < pages"><a class="page-link" href="#" @click="countPage(true)">Next</a></li>
+      </ul>
+    </div>
   </div>
+
+
   <!-- modal -->
   <div class="modal fade" id="ModalMenu" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
@@ -170,6 +183,9 @@ export default {
       hargaValidate: "",
       tipeValidate: "",
       menus: [],
+      pages: 0,
+      page: 1,
+      totalDataShow: 10,
       modal: "",
     };
   },
@@ -324,8 +340,28 @@ export default {
           }
         });
     },
-  },
-  computed: {
+
+    selectPage(numberPage){
+      return this.page = numberPage
+    },
+
+    countPage(isPlus) {
+      if (isPlus) return this.page += 1
+      return this.page -= 1
+    },
+
+    filterPages() {
+      const data = this.cariMenu()
+      const jumlahPage = Math.ceil(data.length / this.totalDataShow) || 1
+      const indexFirstDataShow = (this.page - 1) * this.totalDataShow
+      const indexLastDataShow = this.page * this.totalDataShow
+      this.pages = jumlahPage
+
+      return data.filter((data, index) => {
+        if (index >= indexFirstDataShow && index < indexLastDataShow ) return data
+      })
+    },
+
     cariMenu() {
       return this.menus.filter((menu) => {
         if (this.type.length !== 0 && menu.tipe === this.type){
@@ -334,6 +370,12 @@ export default {
           return menu.nama.match(this.cari);
         }
       });
+    }
+
+  },
+  computed: {
+    cariMenus() {
+      return this.filterPages()
     },
   },
 };
