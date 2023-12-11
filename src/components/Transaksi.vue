@@ -42,7 +42,7 @@
       </thead>
       <!-- jika server aman -->
       <tbody v-if="adaData == 'ada'" class="table-group-divider">
-        <tr v-for="transaksi in cariTransaksi" :key="transaksi.idTransaksi">
+        <tr v-for="transaksi in cariTransaksis" :key="transaksi.idTransaksi">
           <td>{{ transaksi.username }} <span class="badge text-bg-info ms-2 text-light" v-if="transaksi.status == 'lunas'">Lunas</span></td>
           <td>{{ transaksi.nomorMeja }}</td>
           <td>{{ new Date(transaksi.tanggalBuat).toLocaleString() }}</td>
@@ -76,6 +76,17 @@
         </tr>
       </tbody>
     </table>
+    <div aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" v-if="page > 1"><a class="page-link" href="#" @click="countPage(false)">Previous</a></li>
+        <li class="page-item" v-for="page in pages" :key="page">
+          <a class="page-link" href="#" v-if="!(pages.length === 1)" @click="selectPage(page)" >
+            {{page}}
+          </a>
+        </li>
+        <li class="page-item" v-if="page < pages"><a class="page-link" href="#" @click="countPage(true)">Next</a></li>
+      </ul>
+    </div>
   </div>
 
   <!-- Modal -->
@@ -138,6 +149,9 @@ export default {
       cariLunas: "",
       adaData: "",
       transaksis: [],
+      pages: 0,
+      page: 1,
+      totalDataShow: 10,
       detailTransaksis: [],
       total: "",
       idTransaksi: "",
@@ -176,14 +190,8 @@ export default {
       });
   },
   computed: {
-    cariTransaksi() {
-      return this.transaksis.filter((transaksi) => {
-        if (this.cariLunas.length !== 0 && transaksi.status === this.cariLunas){
-          return transaksi.username.match(this.cari);
-        } else if (this.cariLunas.length === 0){
-          return transaksi.username.match(this.cari);
-        }
-      });
+    cariTransaksis() {
+      return this.filterPages()
     },
     // cariLunas() {
     //   return this.transaksis.filter((transaksi) => {
@@ -245,6 +253,38 @@ export default {
           console.log(error);
         });
     },
+
+    selectPage(numberPage){
+      return this.page = numberPage
+    },
+
+    countPage(isPlus) {
+      if (isPlus) return this.page += 1
+      return this.page -= 1
+    },
+
+    cariTransaksi(){
+      return this.transaksis.filter((transaksi) => {
+        if (this.cariLunas.length !== 0 && transaksi.status === this.cariLunas){
+          return transaksi.username.match(this.cari);
+        } else if (this.cariLunas.length === 0){
+          return transaksi.username.match(this.cari);
+        }
+      });
+    },
+
+    filterPages() {
+      const data = this.cariTransaksi()
+      console.log(data);
+      const jumlahPage = Math.ceil(data.length / this.totalDataShow) || 1
+      const indexFirstDataShow = (this.page - 1) * this.totalDataShow
+      const indexLastDataShow = this.page * this.totalDataShow
+      this.pages = jumlahPage
+
+      return data.filter((data, index) => {
+        if (index >= indexFirstDataShow && index < indexLastDataShow ) return data
+      })
+    }
   },
 };
 </script>

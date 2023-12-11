@@ -8,6 +8,17 @@
           <!-- search bar -->
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" v-model="cari" />
         </form>
+        <div aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item" v-if="page > 1"><a class="page-link" href="#" @click="countPage(false)">Previous</a></li>
+            <li class="page-item" v-for="page in pages" :key="page">
+              <a class="page-link" href="#" @click="selectPage(page)">
+                {{ page }}
+              </a>
+            </li>
+            <li class="page-item" v-if="page < pages"><a class="page-link" href="#" @click="countPage(true)">Next</a></li>
+          </ul>
+        </div>
       </div>
     </nav>
     <!-- end navbar search -->
@@ -131,6 +142,9 @@ export default {
       token: localStorage.getItem("token"),
       isOnline: "",
       restorans: [],
+      pages: 0,
+      page: 1,
+      totalDataShow: 10,
       id: "",
       nama: "",
       alamat: "",
@@ -177,6 +191,7 @@ export default {
         // this.isOnline = false;
         console.log(error);
       });
+
   },
   methods: {
     Close() {
@@ -382,13 +397,40 @@ export default {
           }
         });
     },
+
+    selectPage(numberPage) {
+      return this.page = numberPage
+    },
+
+    countPage(isPlus) {
+      if (isPlus) return this.page += 1
+      return this.page -= 1
+    },
+
+    filterPages() {
+      const data = this.cariRest()
+      const jumlahPage = Math.ceil(data.length / this.totalDataShow) || 1
+      const indexFirstDataShow = (this.page - 1) * this.totalDataShow
+      const indexLastDataShow = this.page * this.totalDataShow
+      this.pages = jumlahPage
+
+
+      return data.filter((data, index) => {
+        if (index >= indexFirstDataShow && index < indexLastDataShow) return data
+      })
+    },
+
+    cariRest() {
+      return this.restorans.filter((restoran) => {
+        return restoran.nama.match(this.cari);
+      });
+    }
+
   },
   computed: {
     // fungsi search
     cariRestoran() {
-      return this.restorans.filter((restoran) => {
-        return restoran.nama.match(this.cari);
-      });
+      return this.filterPages()
     },
   },
 };
@@ -399,6 +441,10 @@ export default {
   height: 150px;
   overflow: hidden;
   overflow-y: scroll;
+}
+
+.navbar {
+  display: flex;
 }
 
 .foto-menu {
